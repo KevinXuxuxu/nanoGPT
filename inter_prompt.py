@@ -18,7 +18,7 @@ temperature = 0.8 # 1.0 = no change, < 1.0 = less random, > 1.0 = more random, i
 top_k = 200 # retain only the top_k most likely tokens, clamp others to have 0 probability
 seed = 0
 device = 'cuda' # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1', etc.
-dtype = 'bfloat16' # 'float32' or 'bfloat16' or 'float16'cc
+dtype = 'bfloat16' # 'float32' or 'bfloat16' or 'float16'
 compile = False # use PyTorch 2.0 to compile the model to be faster
 exec(open('configurator.py').read()) # overrides from command line or config file
 # -----------------------------------------------------------------------------
@@ -44,6 +44,13 @@ if init_from == 'resume':
     for k,v in list(state_dict.items()):
         if k.startswith(unwanted_prefix):
             state_dict[k[len(unwanted_prefix):]] = state_dict.pop(k)
+    
+    # this is a temporary solution
+    # TODO: figure out why the models doesn't load
+    for k in ["transformer.h.{}.attn.bias".format(i) for i in range(10)]:
+        if k in state_dict:
+            state_dict.pop(k)
+
     model.load_state_dict(state_dict)
 elif init_from.startswith('gpt2'):
     # init from a given GPT-2 model
